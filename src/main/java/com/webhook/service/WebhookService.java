@@ -20,10 +20,11 @@ public class WebhookService {
         this.delivery = delivery;
     }
     
-    public void registerWebhook(WebhookRequest req){
+    public Webhook registerWebhook(WebhookRequest req){
         String id = UUID.randomUUID().toString();
         Webhook webhook = new Webhook(  req.getTargetUrl(), id, req.getEventType());
         repo.save(webhook);
+        return webhook;
     }
     public void triggerWebhook(EventRequest req){
         Event event = new Event(req.getEventType(), req.getPayload());
@@ -34,5 +35,12 @@ public class WebhookService {
             boolean success = delivery.deliverEvent(webhook, event);
             System.out.println("Delivery to "+webhook.getUrl() + " success: "+success);
     }
+    }
+    public boolean deleteWebhook(String id){
+        Webhook webhook = repo.findWebhook(id);
+        if(webhook == null){
+            return false;
+        }
+        return repo.delete(webhook);
     }
 }

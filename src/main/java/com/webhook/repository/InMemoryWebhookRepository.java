@@ -31,4 +31,20 @@ public class InMemoryWebhookRepository implements WebhookRepository {
         }
         return matchingWebhooks;
     }
+        @Override
+        public Webhook findWebhook(String id){
+            // Find the webhook by url and eventType
+            for(Webhook wb : webhooks){
+                if(wb.getId().equals(id)){
+                    return wb;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public boolean delete(Webhook webhook) {
+        return webhooks.remove(webhook);
+        }
+    
 }
