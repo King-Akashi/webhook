@@ -44,7 +44,7 @@ public class InMemoryWebhookRepository implements WebhookRepository {
 
         @Override
         public boolean delete(Webhook webhook) {
-        return webhooks.remove(webhook);
+            return webhooks.remove(webhook);
         }
     
 }

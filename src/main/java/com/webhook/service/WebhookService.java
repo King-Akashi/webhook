@@ -34,7 +34,7 @@ public class WebhookService {
             System.out.println(webhook);
             boolean success = delivery.deliverEvent(webhook, event);
             System.out.println("Delivery to "+webhook.getUrl() + " success: "+success);
-    }
+        }
     }
     public boolean deleteWebhook(String id){
         Webhook webhook = repo.findWebhook(id);

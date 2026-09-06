@@ -9,7 +9,7 @@ import com.webhook.model.Webhook;
 
 @Service
 public class WebhookDelivery {
-    private final RestClient restClient;
+    private final RestClient restClient; // for dependency injection, we do not create the dependency in the same class. [the laws of cs engineering]
     public WebhookDelivery(RestClient restClient){
         this.restClient = restClient;
     }
