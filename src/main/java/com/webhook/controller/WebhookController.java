@@ -2,6 +2,7 @@ package com.webhook.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,13 +11,16 @@ import org.springframework.web.bind.annotation.RestController;
 import com.webhook.model.EventRequest;
 import com.webhook.model.Webhook;
 import com.webhook.model.WebhookRequest;
+import com.webhook.service.ConsumerService;
 import com.webhook.service.WebhookService;
 
 @RestController
 public class WebhookController {
     private final WebhookService wService;
-    public WebhookController(WebhookService webhookService){
+    private final ConsumerService cService;
+    public WebhookController(WebhookService webhookService, ConsumerService consumerService){
         this.wService = webhookService;
+        this.cService = consumerService;
     }
     @PostMapping("/webhooks")
     public Webhook registerWebhook(@RequestBody WebhookRequest request){
@@ -36,4 +40,13 @@ public class WebhookController {
         }
         return ResponseEntity.notFound().build(); // 404
     }
+    @GetMapping("/consume")
+    public ResponseEntity consume(){
+        boolean executed = cService.processNextEvent();
+        if(executed){
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
 }

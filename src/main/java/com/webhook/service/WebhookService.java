@@ -1,6 +1,5 @@
 package com.webhook.service;
 
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -9,15 +8,16 @@ import com.webhook.model.Event;
 import com.webhook.model.EventRequest;
 import com.webhook.model.Webhook;
 import com.webhook.model.WebhookRequest;
+import com.webhook.queue.MessageQueue;
 import com.webhook.repository.WebhookRepository;
 
 @Service
 public class WebhookService {
     private final WebhookRepository repo;
-    private final WebhookDelivery delivery;
-    public WebhookService(WebhookRepository repo, WebhookDelivery delivery) {
+    private final MessageQueue mq;
+    public WebhookService(WebhookRepository repo, MessageQueue mq) {
         this.repo = repo;
-        this.delivery = delivery;
+        this.mq = mq;
     }
     
     public Webhook registerWebhook(WebhookRequest req){
@@ -26,15 +26,9 @@ public class WebhookService {
         repo.save(webhook);
         return webhook;
     }
-    public void triggerWebhook(EventRequest req){
+    public boolean triggerWebhook(EventRequest req){
         Event event = new Event(req.getEventType(), req.getPayload());
-    
-        List<Webhook> webhooksList = repo.findByEvent(event);
-        for (Webhook webhook : webhooksList) {
-            System.out.println(webhook);
-            boolean success = delivery.deliverEvent(webhook, event);
-            System.out.println("Delivery to "+webhook.getUrl() + " success: "+success);
-        }
+        return mq.enqueue(event); 
     }
     public boolean deleteWebhook(String id){
         Webhook webhook = repo.findWebhook(id);
@@ -43,4 +37,5 @@ public class WebhookService {
         }
         return repo.delete(webhook);
     }
+    
 }
