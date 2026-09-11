@@ -1,9 +1,11 @@
 package com.webhook.service;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.webhook.model.DeliveryAttempt;
 import com.webhook.model.Event;
 import com.webhook.model.EventRequest;
 import com.webhook.model.Webhook;
@@ -15,6 +17,7 @@ import com.webhook.repository.WebhookRepository;
 public class WebhookService {
     private final WebhookRepository repo;
     private final MessageQueue mq;
+    private final int attemptNumber = 1;
     public WebhookService(WebhookRepository repo, MessageQueue mq) {
         this.repo = repo;
         this.mq = mq;
@@ -28,7 +31,12 @@ public class WebhookService {
     }
     public boolean triggerWebhook(EventRequest req){
         Event event = new Event(req.getEventType(), req.getPayload());
-        return mq.enqueue(event); 
+        List<Webhook>ls = repo.findByEvent(event);
+        for (Webhook webhook : ls) {
+            DeliveryAttempt da = new DeliveryAttempt(event, webhook, attemptNumber);
+            mq.enqueue(da);
+        }
+        return true;
     }
     public boolean deleteWebhook(String id){
         Webhook webhook = repo.findWebhook(id);
